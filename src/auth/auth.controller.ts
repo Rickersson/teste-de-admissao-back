@@ -13,7 +13,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from 'src/users/entity/user.entity';
 import { AuthGuard } from './auth.guard';
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 
 @Controller('auth')
 export class AuthController {
@@ -33,7 +33,7 @@ export class AuthController {
     if (!user || !(await bcrypt.compare(loginDto.password, user.password))) {
       throw new Error('Credenciais inválidas');
     }
-    const token = await this.authService.generateToken(user); // Use o método do serviço
+    const token = await this.authService.generateToken(user);
     return { token };
   }
 
