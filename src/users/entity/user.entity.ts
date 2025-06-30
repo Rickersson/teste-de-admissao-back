@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { SyncService } from 'src/sync/sync.service';
+import { Entity, PrimaryGeneratedColumn, Column, AfterInsert } from 'typeorm';
 
 @Entity()
 export class User {
@@ -13,4 +14,6 @@ export class User {
 
   @Column({ default: false })
   isActive: boolean;
+
+
 }

@@ -4,20 +4,33 @@ import { Repository } from 'typeorm';
 import { User } from 'src/users/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { SyncService } from 'src/sync/sync.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) // ✅ Injete o repositório padrão
+    @InjectRepository(User) 
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+     private syncService: SyncService,
   ) {}
 
   async create(email: string, password: string): Promise<User> {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = this.userRepository.create({ email, password: hashedPassword });
-    return this.userRepository.save(user);
+   const hashedPassword = await bcrypt.hash(password, 10); 
+
+    const user = this.userRepository.create({
+      email,
+      password: hashedPassword, 
+    });
+
+    const savedUser = await this.userRepository.save(user);
+
+    
+    await this.syncService.syncUserToKeycloak(savedUser.email, password);
+
+    return savedUser;
   }
+  
 
 
   async findAll(): Promise<User[]> {

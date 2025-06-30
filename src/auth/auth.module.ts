@@ -1,13 +1,14 @@
-// auth.module.ts
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from 'src/users/users.module';
+import { SyncModule } from 'src/sync/sync.module'; 
 
 @Module({
   imports: [
-    UsersModule, 
+    UsersModule,
+    SyncModule, 
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
