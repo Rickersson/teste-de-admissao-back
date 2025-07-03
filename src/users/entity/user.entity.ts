@@ -1,4 +1,3 @@
-import { SyncService } from 'src/sync/sync.service';
 import { Entity, PrimaryGeneratedColumn, Column, AfterInsert } from 'typeorm';
 
 @Entity()
@@ -10,10 +9,11 @@ export class User {
   email: string;
 
   @Column()
-  password: string;
+  password?: string;
 
   @Column({ default: false })
   isActive: boolean;
 
-
+@Column({ nullable: true })
+  keycloakId: string;
 }

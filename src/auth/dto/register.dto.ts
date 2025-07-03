@@ -1,8 +1,10 @@
-import { IsEmail, IsString } from "class-validator";
+import { IsBoolean, IsEmail, IsString } from 'class-validator';
 
 export class RegisterDto {
-@IsEmail()
+  @IsEmail()
   email: string;
-@IsString()
+  @IsString()
   password: string;
+  @IsBoolean()
+  isActive: boolean;
 }

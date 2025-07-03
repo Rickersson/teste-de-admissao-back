@@ -15,37 +15,44 @@ export class AuthService {
      private syncService: SyncService,
   ) {}
 
-  async create(email: string, password: string): Promise<User> {
-   const hashedPassword = await bcrypt.hash(password, 10); 
-
-    const user = this.userRepository.create({
-      email,
-      password: hashedPassword, 
-    });
-
-    const savedUser = await this.userRepository.save(user);
-
-    
-    await this.syncService.syncUserToKeycloak(savedUser.email, password);
-
-    return savedUser;
-  }
+ async create(email: string, password: string): Promise<User> {
+ 
+  const keycloakId = await this.syncService.createKeycloakUser(email, password);
   
+  
+  const hashedPassword = await bcrypt.hash(password, 10); 
 
+  
+  const user = this.userRepository.create({
+    email,
+    password: hashedPassword,
+    isActive: true, 
+    keycloakId 
+  });
+
+  return await this.userRepository.save(user);
+}
+  
+  async findOne(id: number): Promise<User | any> {
+    return this.userRepository.findOne({ where: { id } });
+  }
 
   async findAll(): Promise<User[]> {
-    return this.userRepository.find(); // ✅ Método padrão do Repository
+    return this.userRepository.find(); 
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { email } }); // ✅ Método padrão
+    return this.userRepository.findOne({ where: { email } });
   }
 
-  async update(id: number, email: string, password: string): Promise<User> {
+ 
+
+  async update(id: number, email: string, password: string, isActive: boolean): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new Error('Usuário não encontrado');
     user.email = email;
     user.password = await bcrypt.hash(password, 10);
+    user.isActive = isActive;
     return this.userRepository.save(user);
   }
 
