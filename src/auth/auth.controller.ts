@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   UseGuards,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -59,17 +60,19 @@ async getUserById(@Param('id') id: number): Promise<User> {
   }
 
  
-    @Delete('users/:id')
-  async deleteUser(@Param('id') id: number): Promise<void> {
-   
-    const user = await this.authService.findOne(id);
-    
-    
-    if (user.keycloakId) {
+ @Delete('users/:id')
+async deleteUser(@Param('id') id: number): Promise<void> {
+  const user = await this.authService.findOne(id);
+
+  if (user.keycloakId) {
+    try {
       await this.keycloakAdminService.deleteUser(user.keycloakId);
+    } catch (error) {
+      console.error('Erro ao deletar usuário do Keycloak:', error);
+      
+      throw new InternalServerErrorException('Erro ao deletar do Keycloak');
     }
-    
-   
-    await this.authService.delete(id);
   }
-}
+
+  await this.authService.delete(id);
+}}
