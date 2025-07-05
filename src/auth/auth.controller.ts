@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -16,6 +17,8 @@ import { User } from 'src/users/entity/user.entity';
 import { AuthGuard } from './auth.guard';
 import * as bcrypt from 'bcrypt';
 import { KeycloakAdminService } from 'src/sync/keycloak-admin.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { Any } from 'typeorm';
 
 @Controller('auth')
 export class AuthController {
@@ -51,14 +54,26 @@ async getUserById(@Param('id') id: number): Promise<User> {
 }
 
 
-  @Put('users/:id')
-  async updateUser(
-    @Param('id') id: number,
-    @Body() updateUserDto: RegisterDto,
-  ): Promise<User> {
-    return await this.authService.update(id, updateUserDto.email, updateUserDto.password, updateUserDto.isActive);
+@Put('users/:id')
+async updateUser(
+  @Param('id') id: string,
+  @Body() dto: UpdateUserDto,
+): Promise<User> {
+  try {
+    return await this.authService.update(
+      Number(id),
+      dto.email,
+      dto.newPassword,
+      dto.currentPassword,
+      dto.isActive,
+    );
+  } catch (err) {
+    if (err.message === 'Senha atual incorreta') {
+      throw new BadRequestException('Senha atual incorreta');
+    }
+    throw err;
   }
-
+}
  
  @Delete('users/:id')
 async deleteUser(@Param('id') id: number): Promise<void> {

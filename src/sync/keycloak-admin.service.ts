@@ -69,4 +69,19 @@ public async getAdminToken(): Promise<void> {
       'Content-Type': 'application/json'
     };
   }
+
+    async updateKeycloakPassword(userId: string, newPassword: string) {
+    // chama o endpoint Admin REST para resetar credenciais:
+    await firstValueFrom(
+      this.httpService.put(
+        `${this.keycloakUrl}/admin/realms/${this.realm}/users/${userId}/reset-password`,
+        {
+          type: 'password',
+          value: newPassword,
+          temporary: false
+        },
+        { headers: this.getAdminTokenHeader() }
+      )
+    );
+  }
 }
